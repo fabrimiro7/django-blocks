@@ -1,20 +1,15 @@
-from django.contrib.auth import login, logout, authenticate
-from django.http import HttpResponse
+import re
+
+from django.contrib.auth import logout
+from rest_framework import exceptions
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
-from rest_framework import exceptions
-import re
-import datetime
 
 from edplatform.specific import REMOTE_API
-from .models import User
-from .serializers import *
 from .authentication import create_access_token, JWTAuthentication, create_refresh_token, decode_refresh_token
-import json
-
+from .serializers import *
 
 
 class RegisterView(CreateAPIView):
@@ -57,7 +52,7 @@ class LoginUserView(CreateAPIView):
         if not user.check_password(password):
             raise exceptions.AuthenticationFailed('Invalid credentials')
 
-        access_token = create_access_token(user.id, user.permission, user.user_type)
+        access_token = create_access_token(user.id)
         refresh_token = create_refresh_token(user.id)
 
         response = Response()
@@ -80,7 +75,7 @@ class RefreshAPIView(APIView):
             refresh_token = request.data['reftok']
         id = decode_refresh_token(refresh_token)
         user = User.objects.get(pk=id)
-        access_token = create_access_token(id, user.permission, user.user_type)
+        access_token = create_access_token(id)
         return Response({
             'token': access_token
         })

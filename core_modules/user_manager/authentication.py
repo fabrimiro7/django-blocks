@@ -1,8 +1,10 @@
-import jwt, datetime
+import datetime
+import jwt
+from django.utils.translation import gettext_lazy as _
 from rest_framework import exceptions
 from rest_framework.authentication import BaseAuthentication, get_authorization_header
+
 from .models import User
-import secrets
 
 
 class JWTAuthentication(BaseAuthentication):
@@ -15,14 +17,12 @@ class JWTAuthentication(BaseAuthentication):
 
             return (user, None)
 
-        raise exceptions.AuthenticationFailed('unauthenticated1')
+        raise exceptions.AuthenticationFailed(_("Unauthenticated(Type0)"))
 
 
-def create_access_token(id, permission, user_type):
+def create_access_token(id):
     return jwt.encode({
         'user_id': id,
-        'permission': permission,
-        'user_type': user_type,
         'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=8),
         'iat': datetime.datetime.utcnow()
     }, 'access_secret', algorithm='HS256')
@@ -33,7 +33,7 @@ def decode_access_token(token):
         payload = jwt.decode(token, 'access_secret', algorithms='HS256')
         return payload['user_id']
     except Exception:
-        raise exceptions.AuthenticationFailed('unauthenticated2')
+        raise exceptions.AuthenticationFailed(_("Unauthenticated(Type1)"))
 
 
 def create_refresh_token(id):
@@ -51,4 +51,4 @@ def decode_refresh_token(token):
 
         return payload['user_id']
     except Exception:
-        raise exceptions.AuthenticationFailed('unauthenticated3')
+        raise exceptions.AuthenticationFailed(_("Unauthenticated(Type2)"))

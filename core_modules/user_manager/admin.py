@@ -1,22 +1,21 @@
 # -*- coding: utf-8 -*-
-from django import forms
 from django.contrib.auth.admin import *
 from django.contrib.auth.forms import *
-from .models import *
 from django.core.validators import validate_email as email_re
 from django.utils.translation import ugettext_lazy as _
+
+from .models import *
 
 
 class ProfileAddForm(forms.ModelForm):
     error_messages = {
         'duplicate_email': _("A user with this e-mail address already exists."),
         'password_mismatch': _("The two password fields didn't match."),
-        'not_email': _("Il campo E-mail non è un indirizzo e-mail valido")
+        'not_email': _("Email is not valid"),
     }
     email = forms.RegexField(label=_("E-mail"), max_length=75,
                              regex=r'^[\w.@+-]+$',
-                             help_text=_("Necessario. 75 caratteri o meno. Lettere, numeri e "
-                                            "@/./+/-/_ soltanto."),
+                             help_text=_("Required 75 characters or fewer. Letters, digits and @/./+/-/_ only."),
                              error_messages={'invalid': _("This value may contain only letters, numbers and "
                                              "@/./+/-/_ characters.")})
     password1 = forms.CharField(label=_("Password"),
@@ -40,11 +39,11 @@ class ProfileAddForm(forms.ModelForm):
         try:
             user_already_exist = User.objects.get(email=email, deleted=False)
             if user_already_exist:
-                forms.ValidationError("Esiste già un utenza con questa mail")
+                forms.ValidationError(self.error_messages['duplicate_email'])
         except Exception:
             email_re(email)
             return email
-        raise forms.ValidationError("Indirizzo E-mail non valido")
+        raise forms.ValidationError(self.error_messages['not_email'])
 
     def clean_password2(self):
         password1 = self.cleaned_data.get("password1", "")

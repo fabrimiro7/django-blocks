@@ -1,12 +1,9 @@
 from django.contrib import auth
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.urls import reverse
 from rest_framework import serializers
-from rest_framework.exceptions import AuthenticationFailed
-from django.conf import settings
+
 from core_modules.user_manager.utils.mail_utils import *
 from .models import User
-
 
 
 # Register serializer
@@ -15,7 +12,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password', 'username', 'first_name', 'last_name', 'phone', 'user_type')
+        fields = ('email', 'password', 'username', 'first_name', 'last_name', 'phone')
 
     def validate(self, attrs):
         email = attrs.get('email', '')
@@ -23,7 +20,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         last_name = attrs.get('last_name', '')
         phone = attrs.get('phone', '')
         username = attrs.get('username', '')
-        user_type = attrs.get('user_type', '')
         return attrs
 
     def create(self, validated_data):
