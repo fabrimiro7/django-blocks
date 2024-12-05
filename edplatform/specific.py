@@ -4,8 +4,8 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
-SECRET_KEY = 'ag-ypkombff$24)!a1yuh8(9+%g+cvq%7=1yugxpu(an172w@a'
-ENCRYPT_KEY = 'vMyGxht6U6skBJ7ACADSDmKyHsnZeyECwTnWn45b/2A='
+SECRET_KEY = "ag-ypkombff$24)!a1yuh8(9+%g+cvq%7=1yugxpu(an172w@a"
+ENCRYPT_KEY = "vMyGxht6U6skBJ7ACADSDmKyHsnZeyECwTnWn45b/2A="
 
 
 """
@@ -20,26 +20,26 @@ PRODUCTION = False
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'odr_db',
-        'USER': 'efestodev',
-        'PASSWORD': 'testoh666',
-        'HOST': 'localhost',
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "odr_db",
+        "USER": "efestodev",
+        "PASSWORD": "testoh666",
+        "HOST": "localhost",
     }
 }
 
 JWT_SECRET_KEY = "088a1d45c2c12bd5133a2363ac17e4e3d4a20cebf0532fee745ec61fc668d197"
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-EMAIL_HOST = 'pro.turbo-smtp.com'
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
+EMAIL_HOST = "pro.turbo-smtp.com"
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
 EMAIL_PORT = 587
 
 AWS_S3_ACCESS_KEY_ID = ""
@@ -51,7 +51,5 @@ AWS_DEFAULT_ACL = None
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
 AWS_S3_ENDPOINT_URL = "https://s3.eu-south-1.amazonaws.com"
 
-AWS_S3_REGION_NAME = 'eu-south-1'  # change to your region
-AWS_S3_SIGNATURE_VERSION = 's3v4'
-
-
+AWS_S3_REGION_NAME = "eu-south-1"  # change to your region
+AWS_S3_SIGNATURE_VERSION = "s3v4"
