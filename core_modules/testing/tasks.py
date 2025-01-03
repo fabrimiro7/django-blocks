@@ -14,3 +14,4 @@ def stampa(x):
     # Esegui una stampa
     return x
 
+
