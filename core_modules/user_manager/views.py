@@ -1,20 +1,31 @@
-from django.contrib.auth import login, logout, authenticate
-from django.http import HttpResponse
-from rest_framework import status
+import re
+
+from django.contrib.auth import logout
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from rest_framework import exceptions, status
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.shortcuts import get_object_or_404
-from rest_framework import exceptions
-import re
-import datetime
 
 from edplatform.specific import REMOTE_API
+from .authentication import (
+    JWTAuthentication,
+    create_access_token,
+    create_refresh_token,
+    decode_refresh_token,
+)
 from .models import User
-from .serializers import *
-from .authentication import create_access_token, JWTAuthentication, create_refresh_token, decode_refresh_token
-import json
-
+from .serializers import (
+    GetMembersSerializer,
+    LoginSerializer,
+    RegisterSerializer,
+    RequestResetPW,
+    RequestResetPWMail,
+    UserDetailSerializer,
+    UserDetailSerializerGet,
+    UserSerializer,
+)
 
 
 class RegisterView(CreateAPIView):
@@ -24,66 +35,68 @@ class RegisterView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            email = request.data.get('email', '')
+            email = request.data.get("email", "")
             if not re.match(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$", email):
                 pass
             else:
                 user = serializer.save()
                 user_data = serializer.data
 
-                return Response({
-                    "user": user_data,
-                    "message": "success",
-                    "id_user": user.id,
-                }, status=status.HTTP_200_OK)
-        return Response({
-            "user": "",
-            "message": "fail",
-        }, status=status.HTTP_200_OK)
+                return Response(
+                    {
+                        "user": user_data,
+                        "message": "success",
+                        "id_user": user.id,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        return Response(
+            {
+                "user": "",
+                "message": "fail",
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class LoginUserView(CreateAPIView):
     serializer_class = LoginSerializer
 
     def post(self, request):
-        email = request.data['email']
-        password = request.data['password']
+        email = request.data["email"]
+        password = request.data["password"]
 
         user = User.objects.filter(email=email).first()
 
         if user is None:
-            raise exceptions.AuthenticationFailed('Invalid credentials')
+            raise exceptions.AuthenticationFailed("Invalid credentials")
 
         if not user.check_password(password):
-            raise exceptions.AuthenticationFailed('Invalid credentials')
+            raise exceptions.AuthenticationFailed("Invalid credentials")
 
-        access_token = create_access_token(user.id, user.permission, user.user_type)
+        access_token = create_access_token(user.id)
         refresh_token = create_refresh_token(user.id)
 
         response = Response()
-        response.set_cookie(key='refresh_token_dj', value=refresh_token, httponly=False)
+        response.set_cookie(key="refresh_token_dj", value=refresh_token, httponly=False)
         response.data = {
-            'token': access_token,
-            'refresh_token': refresh_token,
-            'message': "success",
+            "token": access_token,
+            "refresh_token": refresh_token,
+            "message": "success",
         }
         return response
 
 
-
 class RefreshAPIView(APIView):
-    
     def post(self, request):
-        if (request.data['reftok'] == None or request.data['reftok'] == '' or request.data['reftok'] == "undefined"):
-            request.COOKIES.get('refresh_token_dj')
+        if request.data["reftok"] is None or request.data["reftok"] == "" or request.data["reftok"] == "undefined":
+            request.COOKIES.get("refresh_token_dj")
         else:
-            refresh_token = request.data['reftok']
+            refresh_token = request.data["reftok"]
         id = decode_refresh_token(refresh_token)
-        user = User.objects.get(pk=id)
-        access_token = create_access_token(id, user.permission, user.user_type)
-        return Response({
-            'token': access_token
-        })
+        # user = User.objects.get(pk=id)
+        access_token = create_access_token(id)
+        return Response({"token": access_token})
 
 
 class RequestResetPasswordMail(APIView):
@@ -92,10 +105,12 @@ class RequestResetPasswordMail(APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        return Response({
-            "message": "success",
-        }, status=status.HTTP_200_OK)
-
+        return Response(
+            {
+                "message": "success",
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class ResetPassword(APIView):
@@ -105,21 +120,24 @@ class ResetPassword(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        password = request.data.get('password', '')
-        password_confirm = request.data.get('password_confirm', '')
+        password = request.data.get("password", "")
+        password_confirm = request.data.get("password_confirm", "")
         user = User.objects.get(pk=id)
         token = token.replace("_", "-")
 
         if not PasswordResetTokenGenerator().check_token(user=user, token=token):
-            raise AuthenticationFailed('Token Consumato', 401)
+            raise AuthenticationFailed("Token Consumato", 401)
         if not password == password_confirm:
-            raise AuthenticationFailed('Password diverse', 401)
+            raise AuthenticationFailed("Password diverse", 401)
         user.set_password(password)
         user.save()
 
-        return Response({
-            "message": "success",
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "message": "success",
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class Logout(CreateAPIView):
@@ -134,7 +152,7 @@ class Logout(CreateAPIView):
 
 class UserDetail(APIView):
     serializer_class = UserDetailSerializer
-    if REMOTE_API == True:
+    if REMOTE_API:
         authentication_classes = [JWTAuthentication]
 
     def get(self, request, pk):
@@ -142,7 +160,10 @@ class UserDetail(APIView):
             user = User.objects.get(pk=pk)
             if user:
                 serializer = UserDetailSerializerGet(user)
-                return Response({"data": serializer.data, "message": "success"}, status=status.HTTP_200_OK)
+                return Response(
+                    {"data": serializer.data, "message": "success"},
+                    status=status.HTTP_200_OK,
+                )
         except Exception as e:
             print(e)
             user = None
@@ -157,7 +178,10 @@ class UserDetail(APIView):
             serializer = UserDetailSerializer(user, data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"data": serializer.data, "message": "success"}, status=status.HTTP_200_OK)
+                return Response(
+                    {"data": serializer.data, "message": "success"},
+                    status=status.HTTP_200_OK,
+                )
             return Response({"data": serializer.data, "message": "fail"}, status=status.HTTP_200_OK)
         return Response({"data": "", "message": "fail"}, status=status.HTTP_200_OK)
 
@@ -172,6 +196,7 @@ class UserDetail(APIView):
             return Response({"message": "success"}, status=status.HTTP_204_NO_CONTENT)
         else:
             return Response({"message": "fail"}, status=status.HTTP_404_NOT_FOUND)
+
 
 class GetMembersAPIView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -191,10 +216,11 @@ class GetUserAPIView(APIView):
     This view requires JWT authentication and returns a list of users
     serialized using the UserDetailSerializerGet.
     """
+
     serializer_class = UserDetailSerializerGet  # Serializer to use for response
-    
+
     authentication_classes = [JWTAuthentication]  # Authentication classes to use
-    
+
     def get(self, request):
         """
         Retrieve a list of all users.
@@ -203,7 +229,7 @@ class GetUserAPIView(APIView):
         """
         users = User.objects.all()  # Retrieve all users from the database
         serializer = UserDetailSerializerGet(users, many=True)  # Serialize user data
-        
+
         return Response(serializer.data, status=status.HTTP_200_OK)  # Return serialized data
 
 
@@ -215,19 +241,25 @@ class UserView(CreateAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         if serializer.is_valid():
-            email = request.data.get('email', '')
+            email = request.data.get("email", "")
             if not re.match(r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$", email):
                 pass
             else:
                 user = serializer.save()
                 user_data = serializer.data
 
-                return Response({
-                    "user": user_data,
-                    "message": "success",
-                    "id_user": user.id,
-                }, status=status.HTTP_200_OK)
-        return Response({
-            "user": "",
-            "message": "fail",
-        }, status=status.HTTP_200_OK)
+                return Response(
+                    {
+                        "user": user_data,
+                        "message": "success",
+                        "id_user": user.id,
+                    },
+                    status=status.HTTP_200_OK,
+                )
+        return Response(
+            {
+                "user": "",
+                "message": "fail",
+            },
+            status=status.HTTP_200_OK,
+        )

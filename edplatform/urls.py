@@ -14,19 +14,31 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import include, path
+
 from documentation.swagger import swagger_schema_view
 
 urlpatterns = [
-    
     # Auth & Admin
-    path('admin/', admin.site.urls),
-    path('api/user_manager/', include(('core_modules.user_manager.urls', 'user_manager'), namespace='user_manager')),
-    path('api/testing/', include(('core_modules.testing.urls', 'testing'), namespace='testing')),
-
+    path("admin/", admin.site.urls),
+    path(
+        "api/user_manager/",
+        include(("core_modules.user_manager.urls", "user_manager"), namespace="user_manager"),
+    ),
+    path(
+        "api/testing/",
+        include(("core_modules.testing.urls", "testing"), namespace="testing"),
+    ),
     # Documentation urls
-    path('documentation/swagger/', swagger_schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('documentation/redoc/', swagger_schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('', swagger_schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
+    path(
+        "documentation/swagger/",
+        swagger_schema_view.with_ui("swagger", cache_timeout=0),
+        name="schema-swagger-ui",
+    ),
+    path(
+        "documentation/redoc/",
+        swagger_schema_view.with_ui("redoc", cache_timeout=0),
+        name="schema-redoc",
+    ),
+    path("", swagger_schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]
