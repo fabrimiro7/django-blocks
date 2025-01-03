@@ -35,18 +35,15 @@ try:
 except ImportError:
     DEBUG = True
 
-
 try:
     from .specific import ALLOWED_HOSTS
 except ImportError:
     ALLOWED_HOSTS = ['*']
 
 if PRODUCTION == False:
-
     CORS_ORIGIN_ALLOW_ALL = True
 
     CORS_ALLOW_CREDENTIALS = True
-
 
     CORS_ALLOW_METHODS = [
         "DELETE",
@@ -68,9 +65,6 @@ if PRODUCTION == False:
         "x-requested-with",
     ]
 
-
-
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -85,6 +79,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'core_modules.user_manager',
     'core_modules.testing',
+    'django_celery_results',
 ]
 
 if PRODUCTION == True:
@@ -99,7 +94,7 @@ if PRODUCTION == True:
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ]
 else:
-     MIDDLEWARE = [
+    MIDDLEWARE = [
         'django.middleware.security.SecurityMiddleware',
         'whitenoise.middleware.WhiteNoiseMiddleware',
         'django.contrib.sessions.middleware.SessionMiddleware',
@@ -110,7 +105,6 @@ else:
         'django.contrib.messages.middleware.MessageMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ]
-
 
 ROOT_URLCONF = 'edplatform.urls'
 
@@ -148,12 +142,11 @@ if PRODUCTION == True:
         DATABASES = {}
 else:
     DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -174,16 +167,14 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 REST_FRAMEWORK = {
-        'DEFAULT_AUTHENTICATION_CLASSES': [
-            #'user_manager.backends.JWTAuthentication',
-            #'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-            'rest_framework_simplejwt.authentication.JWTAuthentication',
-            'rest_framework.authentication.SessionAuthentication',
-            'rest_framework.authentication.BasicAuthentication',
-        ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        # 'user_manager.backends.JWTAuthentication',
+        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ],
 }
-
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
@@ -198,7 +189,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
@@ -208,12 +198,10 @@ MEDIA_URL = '/media/'
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-
 try:
     from .specific import JWT_SECRET_KEY
 except ImportError:
     JWT_SECRET_KEY = ""
-
 
 try:
     from .specific import EMAIL_BACKEND
@@ -229,7 +217,6 @@ except ImportError:
     EMAIL_HOST_USER = ""
     EMAIL_HOST_PASSWORD = ""
     EMAIL_PORT = ""
-
 
 try:
     from .specific import AWS_S3_ACCESS_KEY_ID
@@ -257,5 +244,8 @@ except ImportError:
     AWS_S3_REGION_NAME = 'eu-south-1'  # change to your region
     AWS_S3_SIGNATURE_VERSION = 's3v4'
 
-
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
+CELERY_RESULT_BACKEND = 'django-db'
+# CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
