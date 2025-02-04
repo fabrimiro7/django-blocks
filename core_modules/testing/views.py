@@ -7,14 +7,12 @@ from core_modules.testing.models import SingleTestElement
 from core_modules.user_manager.authentication import create_access_token, JWTAuthentication, create_refresh_token, \
     decode_refresh_token
 from .tasks import *
-
 from .serializers import SingleTestElementSerializer
 
 
 class SingleTestElementListCreateView(generics.ListCreateAPIView):
     queryset = SingleTestElement.objects.all()
     serializer_class = SingleTestElementSerializer
-
     if REMOTE_API == True:
         authentication_classes = [JWTAuthentication]
 

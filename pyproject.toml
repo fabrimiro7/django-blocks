@@ -1,0 +1,11 @@
+[tool.black]
+line-length = 120
+target-version = ["py39"]  # Adjust the Python version as needed
+exclude = '''
+(
+    migrations   # Ignore all files in migrations directories
+)
+'''
+
+[tool.mypy]
+explicit_package_bases = true

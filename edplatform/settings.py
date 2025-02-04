@@ -10,10 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-import os
-from pathlib import Path
 import mimetypes
+import os
 from datetime import timedelta
+from pathlib import Path
+
 from .specific import PRODUCTION
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +28,7 @@ PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 try:
     from .specific import SECRET_KEY
 except ImportError:
-    SECRET_KEY = ''
+    SECRET_KEY = ""
 
 # SECURITY WARNING: don't run with debug turned on in production!
 try:
@@ -38,7 +39,7 @@ except ImportError:
 try:
     from .specific import ALLOWED_HOSTS
 except ImportError:
-    ALLOWED_HOSTS = ['*']
+    ALLOWED_HOSTS = ["*"]
 
 if PRODUCTION == False:
     CORS_ORIGIN_ALLOW_ALL = True
@@ -84,14 +85,16 @@ INSTALLED_APPS = [
 
 if PRODUCTION == True:
     MIDDLEWARE = [
-        'django.middleware.security.SecurityMiddleware',
-        'whitenoise.middleware.WhiteNoiseMiddleware',
-        'django.contrib.sessions.middleware.SessionMiddleware',
-        'django.middleware.common.CommonMiddleware',
-        'django.middleware.csrf.CsrfViewMiddleware',
-        'django.contrib.auth.middleware.AuthenticationMiddleware',
-        'django.contrib.messages.middleware.MessageMiddleware',
-        'django.middleware.clickjacking.XFrameOptionsMiddleware',
+        "django.middleware.security.SecurityMiddleware",
+        "whitenoise.middleware.WhiteNoiseMiddleware",
+        "django.contrib.sessions.middleware.SessionMiddleware",
+        "corsheaders.middleware.CorsMiddleware",
+        "django.middleware.locale.LocaleMiddleware",
+        "django.middleware.common.CommonMiddleware",
+        "django.middleware.csrf.CsrfViewMiddleware",
+        "django.contrib.auth.middleware.AuthenticationMiddleware",
+        "django.contrib.messages.middleware.MessageMiddleware",
+        "django.middleware.clickjacking.XFrameOptionsMiddleware",
     ]
 else:
     MIDDLEWARE = [
@@ -108,29 +111,30 @@ else:
 
 ROOT_URLCONF = 'edplatform.urls'
 
+
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'edplatform.wsgi.application'
+WSGI_APPLICATION = "edplatform.wsgi.application"
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 13000
 
-AUTH_USER_MODEL = 'user_manager.User'
+AUTH_USER_MODEL = "user_manager.User"
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -153,16 +157,16 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -179,9 +183,9 @@ REST_FRAMEWORK = {
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 
@@ -192,11 +196,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_URL = "/media/"
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 try:
     from .specific import JWT_SECRET_KEY
@@ -204,32 +208,35 @@ except ImportError:
     JWT_SECRET_KEY = ""
 
 try:
-    from .specific import EMAIL_BACKEND
-    from .specific import EMAIL_USE_TLS
-    from .specific import EMAIL_HOST
-    from .specific import EMAIL_HOST_USER
-    from .specific import EMAIL_HOST_PASSWORD
-    from .specific import EMAIL_PORT
+    from .specific import (
+        EMAIL_BACKEND,
+        EMAIL_HOST,
+        EMAIL_HOST_PASSWORD,
+        EMAIL_HOST_USER,
+        EMAIL_PORT,
+        EMAIL_USE_TLS,
+    )
 except ImportError:
     EMAIL_BACKEND = ""
-    EMAIL_USE_TLS = ""
+    EMAIL_USE_TLS = False
+    EMAIL_USE_SSL = False
     EMAIL_HOST = ""
     EMAIL_HOST_USER = ""
     EMAIL_HOST_PASSWORD = ""
     EMAIL_PORT = ""
 
 try:
-    from .specific import AWS_S3_ACCESS_KEY_ID
-    from .specific import AWS_S3_SECRET_ACCESS_KEY
-    from .specific import AWS_STORAGE_BUCKET_NAME
-
-    from .specific import AWS_S3_FILE_OVERWRITE
-    from .specific import AWS_DEFAULT_ACL
-    from .specific import DEFAULT_FILE_STORAGE
-    from .specific import AWS_S3_ENDPOINT_URL
-
-    from .specific import AWS_S3_REGION_NAME
-    from .specific import AWS_S3_SIGNATURE_VERSION
+    from .specific import (
+        AWS_DEFAULT_ACL,
+        AWS_S3_ACCESS_KEY_ID,
+        AWS_S3_ENDPOINT_URL,
+        AWS_S3_FILE_OVERWRITE,
+        AWS_S3_REGION_NAME,
+        AWS_S3_SECRET_ACCESS_KEY,
+        AWS_S3_SIGNATURE_VERSION,
+        AWS_STORAGE_BUCKET_NAME,
+        DEFAULT_FILE_STORAGE,
+    )
 
 except ImportError:
     AWS_S3_ACCESS_KEY_ID = ""
@@ -238,7 +245,7 @@ except ImportError:
 
     AWS_S3_FILE_OVERWRITE = False
     AWS_DEFAULT_ACL = None
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+    DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     AWS_S3_ENDPOINT_URL = ""
 
     AWS_S3_REGION_NAME = 'eu-south-1'  # change to your region
@@ -249,3 +256,4 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
 CELERY_RESULT_BACKEND = 'django-db'
 # CELERY_RESULT_BACKEND = os.environ.get("CELERY_BROKER", "redis://redis:6379/0")
+

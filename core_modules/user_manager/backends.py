@@ -1,6 +1,8 @@
 import jwt
-from rest_framework import authentication, exceptions
 from django.conf import settings
+from django.utils.translation import gettext_lazy as _
+from rest_framework import authentication, exceptions
+
 from .models import User
 
 
@@ -11,14 +13,11 @@ class JWTAuthentication(authentication.BasicAuthentication):
         if not auth_data:
             return None
 
-        prefix, token = auth_data.decode('utf-8').split(' ')
+        prefix, token = auth_data.decode("utf-8").split(" ")
 
         try:
             payload = jwt.decode(token, settings.JWT_SECRET_KEY)
-            user = User.objects.get(username=payload['username'])
+            user = User.objects.get(username=payload["username"])
             return (user, token)
-        except jwt.ExpiredSignatureError as identifier:
-            raise exceptions.AuthenticationFailed('Token non valido, login')
-
-        return super().authenticate(request)
-
+        except jwt.ExpiredSignatureError:
+            raise exceptions.AuthenticationFailed(_("Invalid Token, login again"))
