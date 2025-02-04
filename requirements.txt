@@ -35,4 +35,9 @@ uritemplate==4.1.1
 urllib3==2.2.2
 virtualenv==20.28.0
 whitenoise==5.3.0
-zipp==3.19.1
+zipp==3.6.0
+redis
+celery
+psycopg2-binary>=2.8
+django-celery-results
+
